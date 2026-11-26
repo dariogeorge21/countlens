@@ -3,6 +3,16 @@
 import React, { Component, ReactNode, useSyncExternalStore } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
+if (typeof window !== "undefined") {
+  const originalWarn = console.warn;
+  console.warn = (...args: unknown[]) => {
+    if (typeof args[0] === "string" && args[0].includes("THREE.Clock")) {
+      return;
+    }
+    originalWarn.apply(console, args);
+  };
+}
+
 function isWebGLAvailable(): boolean {
   if (typeof window === "undefined") return false;
   try {
