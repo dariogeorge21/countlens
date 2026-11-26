@@ -73,9 +73,9 @@ export function SceneWrapper({
 
   const cssFallback = (
     <div
-      className={`pointer-events-none absolute inset-0 overflow-hidden ${className ?? ""}`}
+      className={`pointer-events-none fixed inset-0 overflow-hidden ${className ?? ""}`}
     >
-      <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-gradient-to-b from-indigo-500/10 via-cyan-500/5 to-transparent blur-3xl rounded-full" />
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-gradient-to-b from-indigo-500/10 via-cyan-500/5 to-transparent blur-3xl rounded-full" />
     </div>
   );
 

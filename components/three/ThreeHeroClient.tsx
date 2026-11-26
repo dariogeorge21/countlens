@@ -10,7 +10,7 @@ const LazyHeroScene = dynamic(() => import("./HeroScene"), {
 
 export function ThreeHeroClient() {
   return (
-    <SceneWrapper className="absolute inset-0 z-0 h-96 overflow-hidden pointer-events-none">
+    <SceneWrapper className="fixed inset-0 z-0 w-full h-full overflow-hidden pointer-events-none">
       <LazyHeroScene />
     </SceneWrapper>
   );
