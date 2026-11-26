@@ -10,6 +10,7 @@ import {
   Pencil,
   Trash2,
   Bookmark,
+  Share2,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -28,6 +29,7 @@ import { PullHandle } from "@/components/interactions/PullHandle";
 import { DragScrubber } from "@/components/interactions/DragScrubber";
 import { SwipeSurface } from "@/components/interactions/SwipeSurface";
 import { useCountersStore } from "@/store/counters.store";
+import { useGamificationStore } from "@/store/gamification.store";
 import { useUIStore } from "@/store/ui.store";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { Counter } from "@/types/counter";
@@ -48,6 +50,7 @@ export function CounterCard({ counter, className }: CounterCardProps) {
   const resetCounter = useCountersStore((s) => s.resetCounter);
   const deleteCounter = useCountersStore((s) => s.deleteCounter);
   const updateCounter = useCountersStore((s) => s.updateCounter);
+  const openShareModal = useGamificationStore((s) => s.openShareModal);
 
   const openEdit = useUIStore((s) => s.openEdit);
   const setFocusedCounterId = useUIStore((s) => s.setFocusedCounterId);
@@ -231,6 +234,10 @@ export function CounterCard({ counter, className }: CounterCardProps) {
               <DropdownMenuItem onClick={() => duplicateCounter(counter.id)}>
                 <Copy className="w-4 h-4 mr-2" />
                 <span>Duplicate</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => openShareModal(counter)}>
+                <Share2 className="w-4 h-4 mr-2" />
+                <span>Share card</span>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => resetCounter(counter.id)}>
                 <RotateCcw className="w-4 h-4 mr-2" />

@@ -15,6 +15,7 @@ import {
   DeltaResult,
 } from "@/lib/counter-logic";
 import { ExportData } from "@/lib/storage/schema";
+import { useGamificationStore } from "./gamification.store";
 
 interface CountersState {
   counters: Counter[];
@@ -37,7 +38,7 @@ interface CountersState {
   resetCounter: (id: string) => void;
 
   // Counting & History
-  applyDelta: (id: string, delta: number) => DeltaResult | null;
+  applyDelta: (id: string, delta: number, gestureType?: string) => DeltaResult | null;
   setDirectValue: (id: string, newValue: number) => void;
   undo: (id: string) => CounterHistoryEntry | null;
 
@@ -263,7 +264,7 @@ export const useCountersStore = create<CountersState>((set, get) => ({
     get().updateCounter(id, reset);
   },
 
-  applyDelta: (id, delta) => {
+  applyDelta: (id, delta, gestureType = "button") => {
     const state = get();
     const counter = state.counters.find((c) => c.id === id);
     if (!counter) return null;
@@ -288,6 +289,16 @@ export const useCountersStore = create<CountersState>((set, get) => ({
     }, 300);
 
     tabSync.broadcast({ type: "COUNTER_UPSERT", id });
+
+    // Gamification hook
+    if (result.deltaApplied !== 0) {
+      useGamificationStore
+        .getState()
+        .recordCount(counter, result.deltaApplied, gestureType, state.counters);
+      if (result.wrapped) {
+        useGamificationStore.getState().recordWrap();
+      }
+    }
 
     return result;
   },
@@ -317,6 +328,11 @@ export const useCountersStore = create<CountersState>((set, get) => ({
 
     repository.saveCounter(updated);
     tabSync.broadcast({ type: "COUNTER_UPSERT", id });
+
+    // Gamification hook
+    useGamificationStore
+      .getState()
+      .recordCount(counter, delta, "inline_edit", state.counters);
   },
 
   undo: (id) => {

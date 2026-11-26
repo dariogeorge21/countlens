@@ -1,6 +1,7 @@
 import { openDB, IDBPDatabase } from "idb";
 import { Counter } from "@/types/counter";
 import { AppSettings, DEFAULT_SETTINGS } from "@/types/settings";
+import { UserProgression, DailyActivityLog } from "@/types/gamification";
 import { CURRENT_SCHEMA_VERSION, migrateDatabase } from "./migrations";
 import { CounterSchema, AppSettingsSchema } from "./schema";
 
@@ -12,15 +13,21 @@ export interface CounterRepository {
   deleteCounter(id: string): Promise<void>;
   getSettings(): Promise<AppSettings>;
   saveSettings(settings: AppSettings): Promise<void>;
+  getProgression(): Promise<UserProgression | null>;
+  saveProgression(progression: UserProgression): Promise<void>;
+  logDailyCount(date: string, delta: number, counterId: string): Promise<void>;
+  getActivityLogs(limitDays?: number): Promise<DailyActivityLog[]>;
   clearAll(): Promise<void>;
 }
 
 class MemoryCounterRepository implements CounterRepository {
   private counters: Map<string, Counter> = new Map();
   private settings: AppSettings = { ...DEFAULT_SETTINGS };
+  private progression: UserProgression | null = null;
+  private activityLogs: Map<string, DailyActivityLog> = new Map();
 
   isAvailable(): boolean {
-    return false; // Indicates in-memory fallback
+    return false;
   }
 
   async getAllCounters(): Promise<Counter[]> {
@@ -49,8 +56,36 @@ class MemoryCounterRepository implements CounterRepository {
     this.settings = { ...settings };
   }
 
+  async getProgression(): Promise<UserProgression | null> {
+    return this.progression ? { ...this.progression } : null;
+  }
+
+  async saveProgression(p: UserProgression): Promise<void> {
+    this.progression = { ...p };
+  }
+
+  async logDailyCount(date: string, delta: number, counterId: string): Promise<void> {
+    const existing = this.activityLogs.get(date) ?? {
+      date,
+      count: 0,
+      countersActive: {},
+      peakHour: new Date().getHours(),
+    };
+    existing.count = Math.max(0, existing.count + delta);
+    existing.countersActive[counterId] = (existing.countersActive[counterId] ?? 0) + delta;
+    this.activityLogs.set(date, existing);
+  }
+
+  async getActivityLogs(limitDays = 30): Promise<DailyActivityLog[]> {
+    const logs = Array.from(this.activityLogs.values());
+    logs.sort((a, b) => b.date.localeCompare(a.date));
+    return logs.slice(0, limitDays);
+  }
+
   async clearAll(): Promise<void> {
     this.counters.clear();
+    this.progression = null;
+    this.activityLogs.clear();
   }
 }
 
@@ -109,7 +144,7 @@ class IndexedDBCounterRepository implements CounterRepository {
         if (parsed.success) {
           validCounters.push(parsed.data);
         } else {
-          console.warn(`[COUNTLENS] Quarantining corrupted counter record [${(rec as Record<string, unknown>).id ?? "unknown"}]:`, parsed.error);
+          console.warn(`[COUNTLENS] Quarantining corrupted counter record:`, parsed.error);
         }
       }
 
@@ -196,14 +231,82 @@ class IndexedDBCounterRepository implements CounterRepository {
     }
   }
 
+  async getProgression(): Promise<UserProgression | null> {
+    if (!this.isAvailable()) {
+      return this.memoryFallback.getProgression();
+    }
+    try {
+      const db = await this.initDB();
+      const entry = await db.get("progression", "user_progression");
+      return entry ? entry.data : null;
+    } catch {
+      this.hasFailed = true;
+      return this.memoryFallback.getProgression();
+    }
+  }
+
+  async saveProgression(progression: UserProgression): Promise<void> {
+    if (!this.isAvailable()) {
+      return this.memoryFallback.saveProgression(progression);
+    }
+    try {
+      const db = await this.initDB();
+      await db.put("progression", { id: "user_progression", data: progression });
+    } catch {
+      this.hasFailed = true;
+      await this.memoryFallback.saveProgression(progression);
+    }
+  }
+
+  async logDailyCount(date: string, delta: number, counterId: string): Promise<void> {
+    if (!this.isAvailable()) {
+      return this.memoryFallback.logDailyCount(date, delta, counterId);
+    }
+    try {
+      const db = await this.initDB();
+      const tx = db.transaction("activity_logs", "readwrite");
+      const existing = (await tx.store.get(date)) as DailyActivityLog | undefined;
+      const updated: DailyActivityLog = existing ?? {
+        date,
+        count: 0,
+        countersActive: {},
+        peakHour: new Date().getHours(),
+      };
+      updated.count = Math.max(0, updated.count + delta);
+      updated.countersActive[counterId] = (updated.countersActive[counterId] ?? 0) + delta;
+      await tx.store.put(updated);
+      await tx.done;
+    } catch {
+      this.hasFailed = true;
+      await this.memoryFallback.logDailyCount(date, delta, counterId);
+    }
+  }
+
+  async getActivityLogs(limitDays = 30): Promise<DailyActivityLog[]> {
+    if (!this.isAvailable()) {
+      return this.memoryFallback.getActivityLogs(limitDays);
+    }
+    try {
+      const db = await this.initDB();
+      const records = (await db.getAll("activity_logs")) as DailyActivityLog[];
+      records.sort((a, b) => b.date.localeCompare(a.date));
+      return records.slice(0, limitDays);
+    } catch {
+      this.hasFailed = true;
+      return this.memoryFallback.getActivityLogs(limitDays);
+    }
+  }
+
   async clearAll(): Promise<void> {
     if (!this.isAvailable()) {
       return this.memoryFallback.clearAll();
     }
     try {
       const db = await this.initDB();
-      const tx = db.transaction(["counters", "settings"], "readwrite");
+      const tx = db.transaction(["counters", "settings", "progression", "activity_logs"], "readwrite");
       await tx.objectStore("counters").clear();
+      await tx.objectStore("progression").clear();
+      await tx.objectStore("activity_logs").clear();
       await tx.done;
     } catch {
       this.hasFailed = true;

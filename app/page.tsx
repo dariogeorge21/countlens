@@ -7,8 +7,15 @@ import { CounterForm } from "@/components/counter/CounterForm";
 import { SettingsDialog } from "@/components/layout/SettingsDialog";
 import { ShortcutsDialog } from "@/components/layout/ShortcutsDialog";
 import { ThreeHeroClient } from "@/components/three/ThreeHeroClient";
+import { ComboMeter } from "@/components/gamification/ComboMeter";
+import { MilestoneCelebration } from "@/components/gamification/MilestoneCelebration";
+import { AchievementsDialog } from "@/components/gamification/AchievementsDialog";
+import { ChallengesDrawer } from "@/components/gamification/ChallengesDrawer";
+import { AnalyticsDialog } from "@/components/analytics/AnalyticsDialog";
+import { ShareCardModal } from "@/components/gamification/ShareCardModal";
 import { useCountersStore } from "@/store/counters.store";
 import { useUIStore } from "@/store/ui.store";
+import { useGamificationStore } from "@/store/gamification.store";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { AlertTriangle } from "lucide-react";
 
@@ -24,12 +31,15 @@ export default function Home() {
   const editingCounterId = useUIStore((s) => s.editingCounterId);
   const closeEdit = useUIStore((s) => s.closeEdit);
 
+  const hydrateGamification = useGamificationStore((s) => s.hydrate);
+
   // Initialize keyboard shortcuts & hydration
   useKeyboardShortcuts();
 
   useEffect(() => {
     hydrate();
-  }, [hydrate]);
+    hydrateGamification();
+  }, [hydrate, hydrateGamification]);
 
   const editingCounter = editingCounterId
     ? counters.find((c) => c.id === editingCounterId) ?? null
@@ -96,6 +106,24 @@ export default function Home() {
 
       {/* Shortcuts Guide Dialog */}
       <ShortcutsDialog />
+
+      {/* Floating Combo Meter */}
+      <ComboMeter />
+
+      {/* Milestone Fanfare & Particles Celebrations */}
+      <MilestoneCelebration />
+
+      {/* Achievements Gallery Dialog */}
+      <AchievementsDialog />
+
+      {/* Daily Quests & Streak drawer */}
+      <ChallengesDrawer />
+
+      {/* Personal Analytics & Heatmap Dialog */}
+      <AnalyticsDialog />
+
+      {/* Share Milestone Card Modal */}
+      <ShareCardModal />
 
       {/* Accessible Polite Live Region for Screen Readers */}
       <div

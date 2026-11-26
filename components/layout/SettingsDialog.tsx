@@ -21,8 +21,21 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { useCountersStore } from "@/store/counters.store";
 import { useUIStore } from "@/store/ui.store";
+import { useGamificationStore } from "@/store/gamification.store";
 import { downloadBackupFile, parseAndValidateImport } from "@/lib/storage/export-import";
-import { Volume2, Vibrate, Download, Upload, Trash2, Database } from "lucide-react";
+import { soundSynthesizer } from "@/lib/gamification/sound-synthesizer";
+import { SoundTheme } from "@/types/gamification";
+import {
+  Volume2,
+  Vibrate,
+  Download,
+  Upload,
+  Trash2,
+  Database,
+  Music,
+  ShieldCheck,
+  EyeOff,
+} from "lucide-react";
 import { toast } from "sonner";
 
 export function SettingsDialog() {
@@ -35,6 +48,11 @@ export function SettingsDialog() {
   const importData = useCountersStore((s) => s.importData);
   const clearAll = useCountersStore((s) => s.clearAll);
   const storageStatus = useCountersStore((s) => s.storageStatus);
+
+  const progression = useGamificationStore((s) => s.progression);
+  const setSoundTheme = useGamificationStore((s) => s.setSoundTheme);
+  const toggleFocusMode = useGamificationStore((s) => s.toggleFocusMode);
+  const useStreakFreeze = useGamificationStore((s) => s.useStreakFreeze);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
@@ -70,12 +88,19 @@ export function SettingsDialog() {
     toast.success(`Import complete (${mode === "replace" ? "Replaced all" : "Merged"})`);
   };
 
+  const handleThemeChange = (theme: SoundTheme) => {
+    setSoundTheme(theme);
+    if (settings.sound) {
+      soundSynthesizer.playCountTick(theme, 0);
+    }
+  };
+
   return (
     <>
       <Dialog open={isSettingsOpen} onOpenChange={setSettingsOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-lg font-bold">Preferences & Data</DialogTitle>
+            <DialogTitle className="text-lg font-bold">Preferences &amp; Data</DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4 py-1">
@@ -99,21 +124,73 @@ export function SettingsDialog() {
               </span>
             </div>
 
-            {/* Audio Feedback */}
+            {/* Focus Mode (Pure Counter) */}
             <div className="flex items-center justify-between p-3 rounded-2xl bg-secondary/30">
               <div className="flex items-center gap-2.5">
-                <Volume2 className="w-4 h-4 text-muted-foreground" />
+                <EyeOff className="w-4 h-4 text-amber-500" />
                 <div>
-                  <div className="text-xs font-semibold">Audio Feedback</div>
+                  <div className="text-xs font-semibold">Focus Mode (Pure Counter)</div>
                   <div className="text-[11px] text-muted-foreground">
-                    Subtle tactile clicks and limit thuds via Web Audio
+                    Distraction-free mode: hides combos, XP, and badges
                   </div>
                 </div>
               </div>
               <Switch
-                checked={settings.sound}
-                onCheckedChange={(checked) => updateSettings({ sound: checked })}
+                checked={progression.focusMode}
+                onCheckedChange={toggleFocusMode}
               />
+            </div>
+
+            {/* Audio Feedback */}
+            <div className="p-3 rounded-2xl bg-secondary/30 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <Volume2 className="w-4 h-4 text-muted-foreground" />
+                  <div>
+                    <div className="text-xs font-semibold">Audio Feedback</div>
+                    <div className="text-[11px] text-muted-foreground">
+                      Synthesized tactile clicks and chords via Web Audio
+                    </div>
+                  </div>
+                </div>
+                <Switch
+                  checked={settings.sound}
+                  onCheckedChange={(checked) => updateSettings({ sound: checked })}
+                />
+              </div>
+
+              {/* Sound Theme Selector */}
+              {settings.sound && (
+                <div className="pt-2 border-t border-border/40">
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-semibold mb-2">
+                    <Music className="w-3.5 h-3.5 text-indigo-500" />
+                    <span>Sound Profile</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {(
+                      [
+                        { id: "chime", label: "Pentatonic Chime" },
+                        { id: "mechanical", label: "Mechanical Click" },
+                        { id: "arcade", label: "Arcade 8-Bit" },
+                        { id: "minimal", label: "Subtle Minimal" },
+                      ] as const
+                    ).map((t) => (
+                      <button
+                        key={t.id}
+                        type="button"
+                        onClick={() => handleThemeChange(t.id)}
+                        className={`px-2.5 py-1.5 rounded-xl text-xs font-medium border text-left transition-all cursor-pointer ${
+                          progression.soundTheme === t.id
+                            ? "bg-primary text-primary-foreground border-primary font-bold shadow-xs"
+                            : "bg-background/60 hover:bg-background border-border/60 text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        {t.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Haptics */}
@@ -133,6 +210,36 @@ export function SettingsDialog() {
               />
             </div>
 
+            {/* Streak Freeze Management */}
+            <div className="flex items-center justify-between p-3 rounded-2xl bg-secondary/30">
+              <div className="flex items-center gap-2.5">
+                <ShieldCheck className="w-4 h-4 text-cyan-500" />
+                <div>
+                  <div className="text-xs font-semibold">Streak Freeze Protection</div>
+                  <div className="text-[11px] text-muted-foreground">
+                    {progression.streakFreezeAvailable
+                      ? "1 Freezes armed for this month"
+                      : "Used for this calendar month"}
+                  </div>
+                </div>
+              </div>
+              {progression.streakFreezeAvailable ? (
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-600 dark:text-cyan-400">
+                  Armed
+                </span>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 text-[11px] px-2.5"
+                  onClick={useStreakFreeze}
+                  disabled={!progression.streakFreezeAvailable}
+                >
+                  Used
+                </Button>
+              )}
+            </div>
+
             {/* Export & Import */}
             <div className="space-y-2 pt-2 border-t border-border/50">
               <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
@@ -142,7 +249,7 @@ export function SettingsDialog() {
                 <Button
                   variant="outline"
                   onClick={handleExport}
-                  className="gap-2 text-xs h-10"
+                  className="gap-2 text-xs h-10 cursor-pointer"
                 >
                   <Download className="w-4 h-4" />
                   <span>Export JSON</span>
@@ -151,7 +258,7 @@ export function SettingsDialog() {
                 <Button
                   variant="outline"
                   onClick={() => fileInputRef.current?.click()}
-                  className="gap-2 text-xs h-10"
+                  className="gap-2 text-xs h-10 cursor-pointer"
                 >
                   <Upload className="w-4 h-4" />
                   <span>Import JSON</span>
@@ -171,7 +278,7 @@ export function SettingsDialog() {
               <Button
                 variant="destructive"
                 onClick={() => setShowClearConfirm(true)}
-                className="w-full gap-2 text-xs h-9"
+                className="w-full gap-2 text-xs h-9 cursor-pointer"
               >
                 <Trash2 className="w-4 h-4" />
                 <span>Delete All Counters</span>

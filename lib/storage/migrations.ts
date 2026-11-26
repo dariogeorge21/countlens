@@ -1,4 +1,4 @@
-export const CURRENT_SCHEMA_VERSION = 1;
+export const CURRENT_SCHEMA_VERSION = 2;
 
 /**
  * Handles database schema upgrades and data migration
@@ -14,6 +14,17 @@ export function migrateDatabase(db: IDBDatabase, oldVersion: number) {
 
     if (!db.objectStoreNames.contains("settings")) {
       db.createObjectStore("settings", { keyPath: "key" });
+    }
+  }
+
+  if (oldVersion < 2) {
+    if (!db.objectStoreNames.contains("progression")) {
+      db.createObjectStore("progression", { keyPath: "id" });
+    }
+
+    if (!db.objectStoreNames.contains("activity_logs")) {
+      const activityStore = db.createObjectStore("activity_logs", { keyPath: "date" });
+      activityStore.createIndex("date", "date", { unique: true });
     }
   }
 }
