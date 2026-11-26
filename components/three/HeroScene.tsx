@@ -3,6 +3,7 @@
 import React, { useRef, useMemo } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Float } from "@react-three/drei";
+import { useTheme } from "next-themes";
 import * as THREE from "three";
 
 interface StructureProps {
@@ -13,7 +14,7 @@ interface StructureProps {
   color: string;
   floatSpeed?: number;
   floatIntensity?: number;
-  wireframeLinewidth?: number;
+  isDark: boolean;
 }
 
 function WireframeStructure({
@@ -24,21 +25,21 @@ function WireframeStructure({
   color,
   floatSpeed = 1.5,
   floatIntensity = 0.8,
+  isDark,
 }: StructureProps) {
-  const meshRef = useRef<THREE.Mesh>(null);
+  const groupRef = useRef<THREE.Group>(null);
 
   useFrame((_, delta) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.x += delta * rotationSpeed[0];
-      meshRef.current.rotation.y += delta * rotationSpeed[1];
-      meshRef.current.rotation.z += delta * rotationSpeed[2];
+    if (groupRef.current) {
+      groupRef.current.rotation.x += delta * rotationSpeed[0];
+      groupRef.current.rotation.y += delta * rotationSpeed[1];
+      groupRef.current.rotation.z += delta * rotationSpeed[2];
     }
   });
 
   const geom = useMemo(() => {
     switch (geometry) {
       case "torus":
-        // Fine triangulated wireframe mesh like the reference image
         return new THREE.TorusGeometry(1.4, 0.42, 28, 56);
       case "ring":
         return new THREE.TorusGeometry(1.9, 0.22, 24, 64);
@@ -53,6 +54,12 @@ function WireframeStructure({
     }
   }, [geometry]);
 
+  // Translucency settings tuned for bright mode vs dark mode
+  const wireColor = isDark ? color : "#64748b";
+  const wireOpacity = isDark ? 0.75 : 0.52;
+  const glassColor = isDark ? color : "#e0e7ff";
+  const glassOpacity = isDark ? 0.07 : 0.16;
+
   return (
     <Float
       speed={floatSpeed}
@@ -60,21 +67,37 @@ function WireframeStructure({
       floatIntensity={floatIntensity}
       position={position}
     >
-      <mesh ref={meshRef} geometry={geom} scale={scale}>
-        <meshStandardMaterial
-          color={color}
-          roughness={0.12}
-          metalness={0.88}
-          wireframe={true}
-          transparent={true}
-          opacity={0.85}
-        />
-      </mesh>
+      <group ref={groupRef} scale={scale}>
+        {/* Layer 1: Inner Translucent Crystalline Facet Body */}
+        <mesh geometry={geom}>
+          <meshStandardMaterial
+            color={glassColor}
+            roughness={0.15}
+            metalness={isDark ? 0.5 : 0.1}
+            transparent={true}
+            opacity={glassOpacity}
+            side={THREE.DoubleSide}
+            depthWrite={false}
+          />
+        </mesh>
+
+        {/* Layer 2: Outer Translucent Wireframe Mesh with Specular Sheen */}
+        <mesh geometry={geom}>
+          <meshStandardMaterial
+            color={wireColor}
+            roughness={0.12}
+            metalness={0.9}
+            wireframe={true}
+            transparent={true}
+            opacity={wireOpacity}
+          />
+        </mesh>
+      </group>
     </Float>
   );
 }
 
-function SceneComposition() {
+function SceneComposition({ isDark }: { isDark: boolean }) {
   const lightRef = useRef<THREE.PointLight>(null);
 
   // Parallax camera movement and specular cursor tracking
@@ -99,13 +122,13 @@ function SceneComposition() {
     }
   });
 
-  const structures: StructureProps[] = useMemo(
+  const structures: Omit<StructureProps, "isDark">[] = useMemo(
     () => [
-      // Primary Hero Trio (as in reference image)
+      // Primary Hero Trio (Matching reference image with translucent depth)
       {
         position: [-4.2, 1.2, -1.5],
         geometry: "octahedron",
-        color: "#94a3b8", // Crisp slate wireframe
+        color: "#94a3b8",
         scale: 1.35,
         rotationSpeed: [0.08, 0.14, 0.04],
         floatSpeed: 1.4,
@@ -113,7 +136,7 @@ function SceneComposition() {
       {
         position: [-0.6, 2.6, -2.5],
         geometry: "icosahedron",
-        color: "#a5b4fc", // Soft lavender / indigo
+        color: "#a5b4fc",
         scale: 1.2,
         rotationSpeed: [0.12, 0.16, 0.08],
         floatSpeed: 1.8,
@@ -121,7 +144,7 @@ function SceneComposition() {
       {
         position: [4.4, 1.4, -1.0],
         geometry: "torus",
-        color: "#c7d2fe", // Meshed high-poly torus ring with specular gleam
+        color: "#c7d2fe",
         scale: 1.25,
         rotationSpeed: [0.15, 0.22, 0.06],
         floatSpeed: 1.6,
@@ -139,7 +162,7 @@ function SceneComposition() {
       {
         position: [5.2, -2.2, -2.8],
         geometry: "octahedron",
-        color: "#67e8f9", // Cyan crystal
+        color: "#67e8f9",
         scale: 1.4,
         rotationSpeed: [-0.14, 0.18, 0.05],
         floatSpeed: 1.7,
@@ -147,7 +170,7 @@ function SceneComposition() {
       {
         position: [0.8, -3.5, -4.0],
         geometry: "dodecahedron",
-        color: "#c084fc", // Purple geometric polyhedra
+        color: "#c084fc",
         scale: 1.5,
         rotationSpeed: [0.09, -0.12, 0.1],
         floatSpeed: 1.2,
@@ -165,7 +188,7 @@ function SceneComposition() {
       {
         position: [2.5, 3.8, -5.0],
         geometry: "octahedron",
-        color: "#a7f3d0", // Soft emerald tint
+        color: "#a7f3d0",
         scale: 1.3,
         rotationSpeed: [-0.08, 0.11, 0.07],
         floatSpeed: 1.1,
@@ -192,33 +215,40 @@ function SceneComposition() {
 
   return (
     <>
-      <ambientLight intensity={0.7} />
-      <directionalLight position={[10, 15, 10]} intensity={1.4} />
-      <directionalLight position={[-10, -10, -5]} intensity={0.5} color="#818cf8" />
+      <ambientLight intensity={isDark ? 0.7 : 0.95} />
+      <directionalLight position={[10, 15, 10]} intensity={isDark ? 1.4 : 1.8} />
+      <directionalLight
+        position={[-10, -10, -5]}
+        intensity={0.6}
+        color={isDark ? "#818cf8" : "#93c5fd"}
+      />
       <pointLight
         ref={lightRef}
         position={[0, 0, 4]}
-        intensity={2.2}
-        distance={15}
+        intensity={isDark ? 2.2 : 2.8}
+        distance={18}
         color="#ffffff"
       />
 
       {structures.map((s, idx) => (
-        <WireframeStructure key={idx} {...s} />
+        <WireframeStructure key={idx} isDark={isDark} {...s} />
       ))}
     </>
   );
 }
 
 export default function HeroScene() {
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
+
   return (
-    <div className="fixed inset-0 w-full h-full pointer-events-none opacity-65 dark:opacity-40 transition-opacity duration-500">
+    <div className="fixed inset-0 w-full h-full pointer-events-none opacity-85 dark:opacity-40 transition-opacity duration-500">
       <Canvas
         camera={{ position: [0, 0, 7], fov: 50 }}
         dpr={[1, 1.5]}
         gl={{ antialias: true, alpha: true }}
       >
-        <SceneComposition />
+        <SceneComposition isDark={isDark} />
       </Canvas>
     </div>
   );
