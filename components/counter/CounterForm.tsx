@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Counter, COLOR_PALETTE, LimitBehavior } from "@/types/counter";
+import { AVAILABLE_ICONS, CounterIcon } from "./CounterIcon";
 import { Check } from "lucide-react";
 
 interface CounterFormProps {
@@ -20,21 +21,6 @@ interface CounterFormProps {
   onSubmit: (counterData: Partial<Counter> & { name: string }) => void;
   initialCounter?: Counter | null;
 }
-
-const ICON_OPTIONS = [
-  "Hash",
-  "Flame",
-  "Droplets",
-  "Target",
-  "Trophy",
-  "Heart",
-  "Dumbbell",
-  "Coffee",
-  "Book",
-  "Coins",
-  "Sparkles",
-  "CheckCircle",
-];
 
 function CounterFormFields({
   initialCounter,
@@ -204,7 +190,7 @@ function CounterFormFields({
               <button
                 type="button"
                 onClick={() => setLimitBehavior("stop")}
-                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer ${
                   limitBehavior === "stop"
                     ? "bg-primary text-primary-foreground"
                     : "bg-secondary text-muted-foreground"
@@ -215,7 +201,7 @@ function CounterFormFields({
               <button
                 type="button"
                 onClick={() => setLimitBehavior("wrap")}
-                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer ${
                   limitBehavior === "wrap"
                     ? "bg-primary text-primary-foreground"
                     : "bg-secondary text-muted-foreground"
@@ -251,24 +237,26 @@ function CounterFormFields({
         </div>
       </div>
 
-      {/* Curated Icons */}
+      {/* Purposeful Icons with Visual Previews */}
       <div className="space-y-1.5">
         <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          Icon
+          Category Icon
         </label>
-        <div className="flex flex-wrap gap-1.5">
-          {ICON_OPTIONS.map((ico) => (
+        <div className="grid grid-cols-4 sm:grid-cols-7 gap-1.5 pt-1">
+          {AVAILABLE_ICONS.map((ico) => (
             <button
               key={ico}
               type="button"
               onClick={() => setIcon(ico)}
-              className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+              title={ico}
+              className={`flex flex-col items-center justify-center gap-1 p-2 rounded-xl text-xs font-medium transition-all cursor-pointer border ${
                 icon === ico
-                  ? "bg-primary text-primary-foreground shadow-sm"
-                  : "bg-secondary/60 text-muted-foreground hover:bg-secondary"
+                  ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                  : "bg-secondary/50 border-border/50 text-muted-foreground hover:bg-secondary hover:text-foreground"
               }`}
             >
-              {ico}
+              <CounterIcon name={ico} className="w-4 h-4" />
+              <span className="text-[10px] truncate max-w-full leading-none">{ico}</span>
             </button>
           ))}
         </div>

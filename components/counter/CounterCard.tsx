@@ -23,6 +23,7 @@ import { CounterValue } from "./CounterValue";
 import { CounterControls } from "./CounterControls";
 import { LimitIndicator } from "./LimitIndicator";
 import { CounterHistory } from "./CounterHistory";
+import { CounterIcon } from "./CounterIcon";
 import { PullHandle } from "@/components/interactions/PullHandle";
 import { DragScrubber } from "@/components/interactions/DragScrubber";
 import { SwipeSurface } from "@/components/interactions/SwipeSurface";
@@ -175,11 +176,16 @@ export function CounterCard({ counter, className }: CounterCardProps) {
 
       {/* Card Header */}
       <div className="relative z-10 flex items-start justify-between gap-2">
-        <div className="flex items-center gap-2 min-w-0">
+        <div className="flex items-center gap-2.5 min-w-0">
           <div
-            className="w-3.5 h-3.5 rounded-full flex-shrink-0 shadow-sm"
-            style={{ backgroundColor: counter.color }}
-          />
+            className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 shadow-xs border border-border/40"
+            style={{
+              backgroundColor: `${counter.color}18`,
+              color: counter.color,
+            }}
+          >
+            <CounterIcon name={counter.icon} className="w-4 h-4 stroke-[2.2]" />
+          </div>
           <div className="min-w-0">
             <h3
               className="font-bold text-sm leading-tight truncate text-foreground group-hover:text-primary transition-colors"

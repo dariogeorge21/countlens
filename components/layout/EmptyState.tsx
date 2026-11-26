@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { motion } from "motion/react";
-import { Sparkles, Plus, Hand, MoveHorizontal, ArrowUpDown, Timer } from "lucide-react";
+import { Gauge, Plus, Hand, MoveHorizontal, ArrowUpDown, Timer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useUIStore } from "@/store/ui.store";
 import { CounterValue } from "@/components/counter/CounterValue";
@@ -27,7 +27,7 @@ export function EmptyState() {
         className="w-full space-y-6"
       >
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-xs font-semibold">
-          <Sparkles className="w-3.5 h-3.5" />
+          <Gauge className="w-3.5 h-3.5" />
           <span>Interactive Gesture Sandbox</span>
         </div>
 

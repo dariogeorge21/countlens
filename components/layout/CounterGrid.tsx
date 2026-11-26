@@ -1,13 +1,13 @@
 "use client";
 
 import React from "react";
-import { motion, AnimatePresence } from "motion/react";
-import { Bookmark, Sparkles } from "lucide-react";
+import { Bookmark, SearchX } from "lucide-react";
 import { CounterCard } from "@/components/counter/CounterCard";
 import { EmptyState } from "./EmptyState";
 import { useCounters } from "@/hooks/useCounters";
 import { useUIStore } from "@/store/ui.store";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { motion, AnimatePresence } from "motion/react";
 
 export function CounterGrid() {
   const { counters, pinnedCounters, unpinnedCounters, isHydrated, totalCount } = useCounters();
@@ -42,7 +42,7 @@ export function CounterGrid() {
     return (
       <div className="py-20 text-center">
         <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-secondary text-muted-foreground mb-3">
-          <Sparkles className="w-6 h-6" />
+          <SearchX className="w-6 h-6" />
         </div>
         <h3 className="text-base font-bold text-foreground">No matching counters</h3>
         <p className="text-xs text-muted-foreground mt-1">
