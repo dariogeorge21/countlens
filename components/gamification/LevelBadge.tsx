@@ -2,7 +2,6 @@
 
 import React from "react";
 import { useGamificationStore } from "@/store/gamification.store";
-import { Sparkles } from "lucide-react";
 
 export function LevelBadge() {
   const progression = useGamificationStore((s) => s.progression);
@@ -14,23 +13,30 @@ export function LevelBadge() {
     <button
       type="button"
       onClick={() => setAchievementsOpen(true)}
-      className="group relative flex items-center gap-2 px-2.5 py-1 rounded-xl bg-secondary/60 hover:bg-secondary/90 transition-all border border-border/50 cursor-pointer select-none"
-      title={`Level ${progression.level}: ${progression.levelTitle} (${progression.currentLevelXp} / ${progression.nextLevelXp} XP to next level)`}
+      className="group relative flex items-center gap-2.5 h-8 px-2.5 rounded-lg bg-background/80 hover:bg-secondary/70 border border-border/80 transition-all duration-150 cursor-pointer select-none shadow-2xs hover:border-foreground/20"
+      title={`Level ${progression.level} • ${progression.levelTitle} (${progression.currentLevelXp} / ${progression.nextLevelXp} XP)`}
     >
-      <div className="relative flex items-center justify-center w-6 h-6 rounded-lg bg-gradient-to-tr from-indigo-500 to-purple-500 text-white font-extrabold text-[11px] shadow-xs">
-        {progression.level}
+      {/* Precision Level Pill */}
+      <div className="flex items-center gap-1">
+        <span className="text-[10px] font-mono tracking-wider uppercase text-muted-foreground font-semibold">
+          LV
+        </span>
+        <span className="text-xs font-mono font-bold tabular-nums text-foreground">
+          {String(progression.level).padStart(2, "0")}
+        </span>
       </div>
 
-      <div className="hidden md:flex flex-col items-start text-left">
-        <div className="flex items-center gap-1">
-          <span className="text-[11px] font-bold text-foreground leading-none">
-            {progression.levelTitle}
-          </span>
-          <Sparkles className="w-2.5 h-2.5 text-indigo-500 opacity-70" />
-        </div>
-        <div className="w-20 h-1.5 rounded-full bg-secondary mt-1 overflow-hidden border border-border/30">
+      {/* Hairline Divider */}
+      <span className="h-3.5 w-[1px] bg-border/80" />
+
+      {/* Title & Micro Progress Meter */}
+      <div className="hidden md:flex flex-col items-start gap-1">
+        <span className="text-[10px] font-semibold text-foreground/80 leading-none tracking-tight group-hover:text-foreground transition-colors">
+          {progression.levelTitle}
+        </span>
+        <div className="w-16 h-1 rounded-full bg-secondary/80 overflow-hidden border border-border/40">
           <div
-            className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-300"
+            className="h-full bg-foreground/70 dark:bg-foreground/85 rounded-full transition-all duration-300"
             style={{ width: `${progression.percentToNext}%` }}
           />
         </div>

@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useGamificationStore } from "@/store/gamification.store";
 import { useCountersStore } from "@/store/counters.store";
-import { Trophy, Share2 } from "lucide-react";
+import { Share2 } from "lucide-react";
 
 export function MilestoneCelebration() {
   const counters = useCountersStore((s) => s.counters);
@@ -25,13 +25,14 @@ export function MilestoneCelebration() {
     if (activeMilestone.tier === "medium" || activeMilestone.tier === "epic") {
       try {
         confetti({
-          particleCount: activeMilestone.tier === "epic" ? 120 : 60,
-          spread: activeMilestone.tier === "epic" ? 90 : 60,
-          origin: { y: 0.6 },
-          colors: ["#6366f1", "#f59e0b", "#10b981", "#ec4899", "#06b6d4"],
+          particleCount: activeMilestone.tier === "epic" ? 70 : 35,
+          spread: 60,
+          origin: { y: 0.65 },
+          colors: ["#18181b", "#71717a", "#e4e4e7", "#6366f1", "#f59e0b"],
+          ticks: 200,
         });
       } catch {
-        // Safe fallback if canvas-confetti context lost
+        // Fallback if canvas-confetti is unavailable
       }
     }
   }, [activeMilestone]);
@@ -49,46 +50,47 @@ export function MilestoneCelebration() {
 
   return (
     <Dialog open={!!activeMilestone} onOpenChange={() => clearMilestoneHit()}>
-      <DialogContent className="max-w-sm text-center">
-        <DialogHeader>
-          <div className="w-16 h-16 mx-auto mb-2 rounded-3xl bg-gradient-to-tr from-amber-400 via-rose-500 to-indigo-600 flex items-center justify-center shadow-xl text-white">
-            <Trophy className="w-8 h-8 stroke-[2.5]" />
+      <DialogContent className="max-w-sm p-6 text-center border-border/80 bg-background/95 backdrop-blur-2xl shadow-2xl">
+        <DialogHeader className="space-y-1">
+          <div className="mx-auto w-10 h-10 rounded-full border border-border/80 bg-secondary/50 flex items-center justify-center text-xs font-mono font-bold text-foreground mb-2">
+            CL
           </div>
-          <DialogTitle className="text-xl font-extrabold tracking-tight">
-            Milestone Reached!
+          <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground font-semibold">
+            Telemetry Milestone
+          </span>
+          <DialogTitle className="text-3xl sm:text-4xl font-mono font-black tracking-tight tabular-nums text-foreground">
+            {activeMilestone.milestone.toLocaleString()}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="py-2 space-y-2">
-          <p className="text-3xl font-extrabold font-mono text-indigo-500">
-            {activeMilestone.milestone}
-          </p>
-          <p className="text-xs text-muted-foreground">
-            You reached {activeMilestone.milestone} on{" "}
-            <span className="font-bold text-foreground">
+        <div className="py-2 space-y-1 font-mono text-xs">
+          <p className="text-muted-foreground">
+            Recorded on{" "}
+            <span className="font-semibold text-foreground">
               {activeMilestone.counterName}
             </span>
-            . That&apos;s meaningful momentum!
+          </p>
+          <p className="text-[11px] text-muted-foreground/70">
+            Tier: {activeMilestone.tier.toUpperCase()} &bull; Cadence intact
           </p>
         </div>
 
-        <div className="flex flex-col gap-2 pt-2">
+        <div className="flex flex-col gap-2 pt-3">
           {targetCounter && (
             <Button
-              variant="glow"
               onClick={handleShare}
-              className="gap-2 font-semibold"
+              className="gap-2 font-mono text-xs h-9 bg-foreground text-background hover:bg-foreground/90 cursor-pointer shadow-sm"
             >
-              <Share2 className="w-4 h-4" />
-              <span>Share Milestone Card</span>
+              <Share2 className="w-3.5 h-3.5" />
+              <span>Generate Collector&apos;s Card</span>
             </Button>
           )}
           <Button
-            variant="outline"
+            variant="ghost"
             onClick={clearMilestoneHit}
-            className="text-xs"
+            className="text-xs h-8 text-muted-foreground hover:text-foreground cursor-pointer font-mono"
           >
-            Continue Counting
+            Continue (Esc)
           </Button>
         </div>
       </DialogContent>

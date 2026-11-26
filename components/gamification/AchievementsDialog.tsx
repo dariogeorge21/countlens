@@ -11,14 +11,30 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useGamificationStore } from "@/store/gamification.store";
 import { useCountersStore } from "@/store/counters.store";
 import { evaluateBadges } from "@/lib/gamification/engine";
-import { Trophy, CheckCircle, Lock, Award } from "lucide-react";
+import { CheckCircle2, Lock, Award } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const TIER_COLORS = {
-  bronze: "from-amber-700/20 to-amber-900/10 border-amber-700/40 text-amber-600 dark:text-amber-400",
-  silver: "from-slate-400/20 to-slate-600/10 border-slate-400/40 text-slate-600 dark:text-slate-300",
-  gold: "from-amber-400/25 to-yellow-600/15 border-amber-400/50 text-amber-500",
-  platinum: "from-cyan-400/25 to-indigo-600/15 border-cyan-400/50 text-cyan-500",
+const TIER_METRICS = {
+  bronze: {
+    label: "BRONZE",
+    border: "border-amber-700/30 dark:border-amber-600/30",
+    badge: "text-amber-700 dark:text-amber-500 bg-amber-500/10",
+  },
+  silver: {
+    label: "SILVER",
+    border: "border-slate-400/30 dark:border-slate-500/30",
+    badge: "text-slate-700 dark:text-slate-300 bg-slate-500/10",
+  },
+  gold: {
+    label: "GOLD",
+    border: "border-amber-400/40 dark:border-amber-400/30",
+    badge: "text-amber-600 dark:text-amber-400 bg-amber-400/10",
+  },
+  platinum: {
+    label: "PLATINUM",
+    border: "border-cyan-400/40 dark:border-cyan-400/30",
+    badge: "text-cyan-600 dark:text-cyan-400 bg-cyan-400/10",
+  },
 };
 
 export function AchievementsDialog() {
@@ -40,103 +56,100 @@ export function AchievementsDialog() {
 
   return (
     <Dialog open={isAchievementsOpen} onOpenChange={setAchievementsOpen}>
-      <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col p-6">
-        <DialogHeader className="pb-2 border-b border-border/40">
+      <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col p-6 bg-background/95 backdrop-blur-2xl border-border/80 shadow-2xl">
+        <DialogHeader className="pb-3 border-b border-border/60">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-500">
-                <Trophy className="w-4 h-4 stroke-[2.5]" />
-              </div>
-              <div>
-                <DialogTitle className="text-lg font-bold">
-                  Achievements Gallery
-                </DialogTitle>
-                <p className="text-xs text-muted-foreground">
-                  Earn XP and unlock badges through tactile consistency and milestones.
-                </p>
-              </div>
+            <div className="space-y-0.5">
+              <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground font-semibold">
+                TELEMETRY CATALOG
+              </span>
+              <DialogTitle className="text-base font-bold font-mono tracking-tight text-foreground">
+                Badges &amp; Milestones
+              </DialogTitle>
             </div>
 
-            <div className="px-3 py-1 rounded-full bg-secondary/80 border border-border/60 text-xs font-mono font-bold">
+            <div className="px-2.5 py-1 rounded-md bg-secondary/60 border border-border/60 text-xs font-mono font-semibold text-foreground">
               {totalUnlocked} / {allBadges.length} Unlocked
             </div>
           </div>
 
           <div className="pt-3">
             <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
-              <TabsList className="grid grid-cols-6 h-8 text-xs">
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="starter">Starter</TabsTrigger>
-                <TabsTrigger value="consistency">Habits</TabsTrigger>
-                <TabsTrigger value="milestone">Scale</TabsTrigger>
-                <TabsTrigger value="exploration">Tactile</TabsTrigger>
-                <TabsTrigger value="mastery">Mastery</TabsTrigger>
+              <TabsList className="grid grid-cols-6 h-8 text-xs font-mono bg-secondary/50 p-0.5 rounded-lg border border-border/60">
+                <TabsTrigger value="all" className="rounded-md text-[11px]">All</TabsTrigger>
+                <TabsTrigger value="starter" className="rounded-md text-[11px]">Origins</TabsTrigger>
+                <TabsTrigger value="consistency" className="rounded-md text-[11px]">Habits</TabsTrigger>
+                <TabsTrigger value="milestone" className="rounded-md text-[11px]">Scale</TabsTrigger>
+                <TabsTrigger value="exploration" className="rounded-md text-[11px]">Tactile</TabsTrigger>
+                <TabsTrigger value="mastery" className="rounded-md text-[11px]">Mastery</TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
         </DialogHeader>
 
-        {/* Badges Grid */}
-        <div className="flex-1 overflow-y-auto pr-1 py-4 space-y-3">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {/* Badges Matrix */}
+        <div className="flex-1 overflow-y-auto pr-1 py-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             {filteredBadges.map((badge) => {
-              const tierStyle = TIER_COLORS[badge.tier];
+              const tier = TIER_METRICS[badge.tier];
               return (
                 <div
                   key={badge.id}
                   className={cn(
-                    "flex flex-col justify-between p-3.5 rounded-2xl border transition-all duration-200 relative overflow-hidden",
+                    "flex flex-col justify-between p-3 rounded-xl border transition-all duration-150 font-mono relative",
                     badge.unlocked
-                      ? `bg-gradient-to-br ${tierStyle} shadow-xs`
-                      : "bg-secondary/30 border-border/40 opacity-70"
+                      ? `bg-secondary/20 hover:bg-secondary/35 ${tier.border} shadow-2xs`
+                      : "bg-secondary/10 border-border/40 opacity-55 hover:opacity-70"
                   )}
                 >
                   <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2.5">
                       <div
                         className={cn(
-                          "w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 border",
+                          "w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 border",
                           badge.unlocked
-                            ? "bg-background/80 border-current shadow-xs"
-                            : "bg-secondary/50 border-border/50 text-muted-foreground"
+                            ? "bg-background/90 border-border/80 text-foreground"
+                            : "bg-secondary/40 border-border/40 text-muted-foreground"
                         )}
                       >
                         {badge.unlocked ? (
-                          <Award className="w-4 h-4 stroke-[2.2]" />
+                          <Award className="w-3.5 h-3.5 stroke-[2]" />
                         ) : (
-                          <Lock className="w-3.5 h-3.5 opacity-60" />
+                          <Lock className="w-3 h-3 stroke-[2] opacity-50" />
                         )}
                       </div>
-                      <div>
-                        <h4 className="font-bold text-xs leading-tight text-foreground">
+                      <div className="min-w-0">
+                        <h4 className="font-bold text-xs leading-tight text-foreground truncate">
                           {badge.title}
                         </h4>
-                        <span className="text-[10px] uppercase tracking-wider font-mono opacity-70">
-                          {badge.tier}
+                        <span className={cn("text-[9px] uppercase tracking-wider font-semibold px-1 py-0.2 rounded mt-0.5 inline-block", tier.badge)}>
+                          {tier.label}
                         </span>
                       </div>
                     </div>
 
-                    <span className="text-[11px] font-mono font-bold px-2 py-0.5 rounded-full bg-background/60 border border-border/40 text-foreground">
+                    <span className="text-[10px] font-semibold text-muted-foreground tabular-nums px-1.5 py-0.5 rounded bg-secondary/50 border border-border/40 flex-shrink-0">
                       +{badge.xpReward} XP
                     </span>
                   </div>
 
-                  <p className="text-xs text-muted-foreground mt-2 line-clamp-2">
+                  <p className="text-[11px] text-muted-foreground/85 font-sans mt-2 line-clamp-2 leading-relaxed">
                     {badge.description}
                   </p>
 
-                  <div className="mt-3 pt-2 border-t border-border/30 flex items-center justify-between text-[11px] font-mono text-muted-foreground">
-                    <span>
+                  <div className="mt-2.5 pt-2 border-t border-border/40 flex items-center justify-between text-[10px] text-muted-foreground">
+                    <span className="tabular-nums">
                       {badge.unlocked
                         ? "Completed"
                         : `${badge.currentProgress} / ${badge.maxProgress}`}
                     </span>
-                    {badge.unlocked && (
-                      <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-bold">
-                        <CheckCircle className="w-3 h-3" />
-                        <span>Unlocked</span>
+                    {badge.unlocked ? (
+                      <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-semibold">
+                        <CheckCircle2 className="w-3 h-3" />
+                        <span>Achieved</span>
                       </div>
+                    ) : (
+                      <span className="text-muted-foreground/50">Locked</span>
                     )}
                   </div>
                 </div>

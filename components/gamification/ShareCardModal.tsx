@@ -10,15 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useGamificationStore } from "@/store/gamification.store";
 import { CounterIcon } from "@/components/counter/CounterIcon";
-import {
-  Copy,
-  Check,
-  Share2,
-  Sparkles,
-  Flame,
-  Award,
-  Zap,
-} from "lucide-react";
+import { Copy, Check, Share2 } from "lucide-react";
 import { toast } from "sonner";
 
 export function ShareCardModal() {
@@ -31,19 +23,20 @@ export function ShareCardModal() {
 
   if (!targetCounter) return null;
 
-  const shareText = `🎯 CountLens Progress Update
+  const serialId = targetCounter.id.slice(0, 8).toUpperCase();
+  const shareText = `COUNTLENS TELEMETRY SPECIMEN // [${serialId}]
 Counter: ${targetCounter.name}
-Value: ${targetCounter.value}
-Level: ${progression.level} (${progression.levelTitle})
-🔥 Streak: ${progression.streak} days
-⚡ Lifetime Counts: ${progression.lifetimeCounts}
-Tactile Studio by CountLens`;
+Value: ${targetCounter.value.toLocaleString()}
+Cadence: Lv.${progression.level} (${progression.levelTitle})
+Streak: ${progression.streak} days
+Lifetime Logs: ${progression.lifetimeCounts.toLocaleString()}
+Verified Local Persistence // CountLens Tactile Studio`;
 
   const handleCopyText = async () => {
     try {
       await navigator.clipboard.writeText(shareText);
       setCopied(true);
-      toast.success("Progress card summary copied to clipboard!");
+      toast.success("Card telemetry copied to clipboard");
       setTimeout(() => setCopied(false), 2000);
     } catch {
       toast.error("Failed to copy to clipboard");
@@ -54,12 +47,11 @@ Tactile Studio by CountLens`;
     if (typeof navigator !== "undefined" && navigator.share) {
       try {
         await navigator.share({
-          title: `${targetCounter.name} on CountLens`,
+          title: `COUNTLENS // ${targetCounter.name}`,
           text: shareText,
           url: window.location.href,
         });
       } catch {
-        // User cancelled or share failed, fallback to copy
         handleCopyText();
       }
     } else {
@@ -69,123 +61,143 @@ Tactile Studio by CountLens`;
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && closeModal()}>
-      <DialogContent className="max-w-md p-6">
+      <DialogContent className="max-w-md p-6 bg-background/95 backdrop-blur-2xl border-border/80 shadow-2xl">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-base font-bold">
-            <Share2 className="w-4 h-4 text-primary" />
-            Share Milestone Card
-          </DialogTitle>
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground font-semibold">
+              Collector&apos;s Specimen
+            </span>
+            <span className="text-[10px] font-mono text-muted-foreground">
+              #{serialId}
+            </span>
+          </div>
+          <DialogTitle className="sr-only">Share Milestone Card</DialogTitle>
         </DialogHeader>
 
-        {/* The Card Preview */}
-        <div className="relative mt-2 overflow-hidden rounded-3xl border border-border/80 bg-gradient-to-br from-card via-card/90 to-secondary/30 p-6 shadow-2xl backdrop-blur-xl">
-          {/* Ambient Corner Glow */}
-          <div
-            className="pointer-events-none absolute -top-12 -right-12 h-44 w-44 rounded-full blur-3xl opacity-25"
-            style={{ backgroundColor: targetCounter.color }}
-          />
-          <div className="pointer-events-none absolute -bottom-12 -left-12 h-44 w-44 rounded-full bg-primary/20 blur-3xl" />
+        {/* Swiss Industrial Specimen Card */}
+        <div className="relative mt-2 rounded-xl border border-border/90 bg-card p-6 shadow-sm font-mono overflow-hidden select-none">
+          {/* Subtle Drafting Grid Accent Line */}
+          <div className="absolute top-0 left-0 right-0 h-[3px] bg-foreground/90" />
 
-          {/* Header Row */}
-          <div className="relative z-10 flex items-center justify-between">
-            <div className="flex items-center gap-2">
+          {/* Top Classification Row */}
+          <div className="flex items-start justify-between gap-3 pb-4 border-b border-border/60">
+            <div className="flex items-center gap-2.5">
               <div
-                className="w-8 h-8 rounded-xl flex items-center justify-center text-white shadow-sm"
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-white border border-black/10 shadow-2xs"
                 style={{ backgroundColor: targetCounter.color }}
               >
-                <CounterIcon name={targetCounter.icon} className="w-4 h-4 stroke-[2.2]" />
+                <CounterIcon name={targetCounter.icon} className="w-4 h-4 stroke-[2]" />
               </div>
               <div>
-                <div className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground">
-                  Counter Progress
+                <div className="text-[9px] uppercase tracking-widest text-muted-foreground font-semibold">
+                  OBJECT SPECIMEN
                 </div>
-                <div className="font-bold text-sm leading-tight text-foreground">
+                <div className="font-bold text-sm leading-tight text-foreground truncate max-w-[200px]">
                   {targetCounter.name}
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary/80 border border-border/60 text-[11px] font-bold text-foreground">
-              <Flame className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-              <span>{progression.streak}d streak</span>
+            <div className="text-right">
+              <div className="text-[9px] uppercase tracking-widest text-muted-foreground font-semibold">
+                CADENCE
+              </div>
+              <div className="text-xs font-bold text-foreground">
+                {progression.streak}d streak
+              </div>
             </div>
           </div>
 
-          {/* Giant Value Display */}
-          <div className="relative z-10 my-6 text-center">
+          {/* Hero Value Monolith */}
+          <div className="py-6 text-center">
             <div
-              className="text-5xl font-black font-mono tracking-tight"
+              className="text-5xl sm:text-6xl font-black tracking-tight tabular-nums"
               style={{ color: targetCounter.color }}
             >
               {targetCounter.value.toLocaleString()}
             </div>
             {targetCounter.max !== null && (
-              <div className="text-xs text-muted-foreground mt-1 font-mono">
-                of {targetCounter.max.toLocaleString()} limit
+              <div className="text-[11px] text-muted-foreground mt-1 tracking-wide">
+                RANGE MAXIMUM: {targetCounter.max.toLocaleString()}
               </div>
             )}
           </div>
 
-          {/* User Progression Footer Strip */}
-          <div className="relative z-10 grid grid-cols-2 gap-2 pt-4 border-t border-border/60 text-xs">
-            <div className="flex items-center gap-2 p-2 rounded-xl bg-background/50 border border-border/40">
-              <Award className="w-4 h-4 text-indigo-500 flex-shrink-0" />
-              <div className="min-w-0">
-                <div className="text-[10px] text-muted-foreground font-semibold">Tier & Level</div>
-                <div className="font-bold truncate text-[11px]">
-                  Lv.{progression.level} {progression.levelTitle}
-                </div>
+          {/* Precision Telemetry 3-Column Strip */}
+          <div className="grid grid-cols-3 gap-2 py-3 border-t border-b border-border/60 text-center text-xs">
+            <div className="space-y-0.5">
+              <div className="text-[9px] text-muted-foreground uppercase tracking-widest">
+                TIER
+              </div>
+              <div className="font-bold text-[11px] text-foreground">
+                LV.{String(progression.level).padStart(2, "0")}
               </div>
             </div>
 
-            <div className="flex items-center gap-2 p-2 rounded-xl bg-background/50 border border-border/40">
-              <Zap className="w-4 h-4 text-amber-500 flex-shrink-0" />
-              <div className="min-w-0">
-                <div className="text-[10px] text-muted-foreground font-semibold">Lifetime Total</div>
-                <div className="font-bold truncate text-[11px]">
-                  {progression.lifetimeCounts.toLocaleString()} counts
-                </div>
+            <div className="space-y-0.5 border-x border-border/60">
+              <div className="text-[9px] text-muted-foreground uppercase tracking-widest">
+                STREAK
+              </div>
+              <div className="font-bold text-[11px] text-foreground">
+                {progression.streak} DAYS
+              </div>
+            </div>
+
+            <div className="space-y-0.5">
+              <div className="text-[9px] text-muted-foreground uppercase tracking-widest">
+                LIFETIME
+              </div>
+              <div className="font-bold text-[11px] text-foreground tabular-nums">
+                {progression.lifetimeCounts.toLocaleString()}
               </div>
             </div>
           </div>
 
-          {/* Watermark branding */}
-          <div className="relative z-10 mt-4 flex items-center justify-between text-[10px] text-muted-foreground font-mono">
-            <span className="flex items-center gap-1">
-              <Sparkles className="w-3 h-3 text-indigo-500" />
-              COUNTLENS Tactile Studio
+          {/* Authentic Industrial Footer */}
+          <div className="mt-4 flex items-center justify-between text-[9px] text-muted-foreground">
+            <div className="flex items-center gap-1.5 font-medium tracking-wider">
+              {/* Decorative mini barcode tick pattern */}
+              <span className="inline-flex gap-[2px] opacity-60">
+                <span className="w-[1px] h-3 bg-foreground" />
+                <span className="w-[2px] h-3 bg-foreground" />
+                <span className="w-[1px] h-3 bg-foreground" />
+                <span className="w-[3px] h-3 bg-foreground" />
+                <span className="w-[1px] h-3 bg-foreground" />
+              </span>
+              <span>VERIFIED LOCAL ARCHIVE</span>
+            </div>
+            <span className="uppercase tracking-widest font-semibold text-foreground/70">
+              COUNTLENS &bull; STUDIO
             </span>
-            <span>Local &bull; Private</span>
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="mt-4 flex items-center gap-2">
+        {/* Action Controls */}
+        <div className="mt-4 flex items-center gap-2 font-mono">
           <Button
             variant="outline"
-            className="flex-1 gap-2 text-xs h-10"
+            className="flex-1 gap-2 text-xs h-9 border-border/80 cursor-pointer"
             onClick={handleCopyText}
           >
             {copied ? (
               <>
-                <Check className="w-4 h-4 text-emerald-500" />
-                <span>Copied!</span>
+                <Check className="w-3.5 h-3.5 text-emerald-500" />
+                <span>Copied</span>
               </>
             ) : (
               <>
-                <Copy className="w-4 h-4" />
-                <span>Copy Summary</span>
+                <Copy className="w-3.5 h-3.5" />
+                <span>Copy Telemetry</span>
               </>
             )}
           </Button>
 
           <Button
-            variant="glow"
-            className="flex-1 gap-2 text-xs h-10"
+            className="flex-1 gap-2 text-xs h-9 bg-foreground text-background hover:bg-foreground/90 cursor-pointer"
             onClick={handleNativeShare}
           >
-            <Share2 className="w-4 h-4" />
-            <span>Share</span>
+            <Share2 className="w-3.5 h-3.5" />
+            <span>Share Specimen</span>
           </Button>
         </div>
       </DialogContent>

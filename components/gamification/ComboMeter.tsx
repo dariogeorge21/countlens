@@ -3,7 +3,6 @@
 import React from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useGamificationStore } from "@/store/gamification.store";
-import { Zap } from "lucide-react";
 
 export function ComboMeter() {
   const combo = useGamificationStore((s) => s.combo);
@@ -15,25 +14,34 @@ export function ComboMeter() {
     <AnimatePresence>
       <motion.div
         key="combo-meter"
-        initial={{ opacity: 0, y: 12, scale: 0.9 }}
+        initial={{ opacity: 0, y: 16, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: -12, scale: 0.9 }}
-        transition={{ type: "spring", stiffness: 500, damping: 25 }}
+        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+        transition={{ type: "spring", stiffness: 450, damping: 28 }}
         className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 pointer-events-none"
       >
-        <div className="flex flex-col items-center px-4 py-2 rounded-2xl bg-gradient-to-r from-amber-500/90 to-rose-500/90 text-white shadow-2xl backdrop-blur-xl border border-white/20 select-none">
-          <div className="flex items-center gap-1.5 font-extrabold text-sm tracking-wide uppercase">
-            <Zap className="w-4 h-4 fill-white animate-bounce" />
-            <span>{combo.multiplier}x COMBO!</span>
-            <span className="text-xs font-mono opacity-90">({combo.count} counts)</span>
+        <div className="flex flex-col items-center px-3.5 py-1.5 rounded-full bg-foreground text-background shadow-2xl border border-background/20 select-none font-mono">
+          <div className="flex items-center gap-2 text-xs font-bold tracking-tight">
+            <span className="flex h-1.5 w-1.5 rounded-full bg-amber-400" />
+            <span className="text-[11px] uppercase tracking-wider opacity-70 font-semibold">
+              CADENCE
+            </span>
+            <span className="text-sm font-black tabular-nums text-amber-400">
+              &times;{combo.multiplier}.0
+            </span>
+            <span className="text-[11px] opacity-60 font-medium tabular-nums border-l border-background/20 pl-2">
+              {combo.count} counts
+            </span>
           </div>
-          <div className="w-full h-1 bg-white/30 rounded-full mt-1.5 overflow-hidden">
+
+          {/* Micro Hairline Decay Gauge */}
+          <div className="w-full h-[2px] bg-background/20 rounded-full mt-1 overflow-hidden">
             <motion.div
               key={combo.lastTapTimestamp}
               initial={{ width: "100%" }}
               animate={{ width: "0%" }}
               transition={{ duration: 1.8, ease: "linear" }}
-              className="h-full bg-white"
+              className="h-full bg-amber-400"
             />
           </div>
         </div>

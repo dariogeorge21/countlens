@@ -57,62 +57,65 @@ export function Header() {
     Boolean(weeklyChallenge?.completed && !weeklyChallenge.claimed);
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-border/60 glass-panel">
+    <header className="sticky top-0 z-40 w-full border-b border-border/70 bg-background/80 backdrop-blur-xl transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
-        {/* Brand Logo & Counters Badge */}
+        {/* Brand Identity & Telemetry Cluster */}
         <div className="flex items-center gap-2.5 sm:gap-3 flex-shrink-0">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-cyan-400 flex items-center justify-center shadow-md shadow-indigo-500/20 text-white font-black text-sm tracking-tighter">
+            <div className="w-8 h-8 rounded-lg bg-foreground text-background flex items-center justify-center font-mono font-black text-xs tracking-tighter shadow-xs">
               CL
             </div>
             <div className="hidden sm:flex flex-col">
-              <span className="font-extrabold tracking-tight text-base leading-none">
+              <span className="font-bold tracking-tight text-sm leading-none text-foreground font-mono">
                 COUNTLENS
               </span>
-              <span className="text-[10px] tracking-widest uppercase text-muted-foreground font-semibold mt-0.5">
+              <span className="text-[9px] tracking-widest uppercase text-muted-foreground font-mono font-medium mt-0.5">
                 Tactile Studio
               </span>
             </div>
           </div>
 
-          {/* Live Global Counters Stats Badge */}
-          <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary/80 text-[11px] font-mono border border-border/50 text-muted-foreground">
-            <span className="font-bold text-foreground">{totalCount}</span>
-            <span>counters</span>
-            <span className="opacity-40">&bull;</span>
-            <span className="font-bold text-foreground">{totalSum}</span>
-            <span>sum</span>
-          </div>
+          {/* Hairline Divider */}
+          <span className="hidden md:inline-block h-4 w-[1px] bg-border/80" />
 
-          {/* Gamification Level & Streak Badges */}
+          {/* Telemetry Capsule (Level & Streak) */}
           {!focusMode && (
             <div className="flex items-center gap-1.5 sm:gap-2">
               <LevelBadge />
               <StreakFlame />
             </div>
           )}
+
+          {/* Quick Stats Pill */}
+          <div className="hidden xl:flex items-center gap-1 px-2 py-1 rounded-md bg-secondary/50 text-[11px] font-mono text-muted-foreground border border-border/50">
+            <span className="font-semibold text-foreground tabular-nums">{totalCount}</span>
+            <span>counters</span>
+            <span className="opacity-30">&bull;</span>
+            <span className="font-semibold text-foreground tabular-nums">{totalSum}</span>
+            <span>total</span>
+          </div>
         </div>
 
-        {/* Search Bar */}
+        {/* Minimalist Search Bar */}
         <div className="flex-1 max-w-xs md:max-w-sm lg:max-w-md relative hidden sm:block">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+          <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
           <Input
             id="counter-search-input"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search counters by name, value or color... (Press /)"
-            className="pl-9 pr-12 h-9 rounded-xl bg-secondary/40 border-border/50 text-xs focus-visible:bg-background transition-colors"
+            placeholder="Search counters... (Press /)"
+            className="pl-8 pr-10 h-8 rounded-lg bg-secondary/30 border-border/60 text-xs focus-visible:bg-background focus-visible:ring-1 focus-visible:ring-foreground/20 transition-all font-mono"
           />
           {searchQuery ? (
             <button
               type="button"
               onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
             >
               <X className="w-3.5 h-3.5" />
             </button>
           ) : (
-            <kbd className="absolute right-2.5 top-1/2 -translate-y-1/2 px-1.5 py-0.5 rounded text-[10px] font-mono text-muted-foreground bg-muted border border-border/50 pointer-events-none">
+            <kbd className="absolute right-2 top-1/2 -translate-y-1/2 px-1 py-0.2 rounded text-[9px] font-mono text-muted-foreground bg-secondary/80 border border-border/50 pointer-events-none">
               /
             </kbd>
           )}
@@ -122,67 +125,64 @@ export function Header() {
         <div className="flex items-center gap-1 sm:gap-1.5">
           {/* Focus Mode Indicator */}
           {focusMode ? (
-            <Button
-              variant="outline"
-              size="sm"
+            <button
+              type="button"
               onClick={toggleFocusMode}
-              className="h-8 px-2.5 rounded-xl text-xs text-amber-500 border-amber-500/40 gap-1.5 hover:bg-amber-500/10 cursor-pointer"
+              className="h-8 px-2.5 rounded-lg text-xs font-mono font-medium text-amber-600 dark:text-amber-400 border border-amber-500/40 bg-amber-500/5 hover:bg-amber-500/10 flex items-center gap-1.5 transition-colors cursor-pointer"
               title="Focus Mode active. Click to restore full gamification UI."
             >
-              <EyeOff className="w-3.5 h-3.5" />
-              <span className="hidden md:inline font-semibold">Exit Focus</span>
-            </Button>
+              <EyeOff className="w-3.5 h-3.5 stroke-[2]" />
+              <span className="hidden md:inline">Exit Focus</span>
+            </button>
           ) : (
-            <>
-              {/* Daily Quests / Challenges Button */}
-              <Button
-                variant="ghost"
-                size="icon"
+            /* Cohesive Monochromatic Companion Launcher Group */
+            <div className="flex items-center p-0.5 rounded-lg bg-secondary/40 border border-border/60">
+              {/* Daily Rituals / Quests */}
+              <button
+                type="button"
                 onClick={() => setChallengesOpen(true)}
-                className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-xl text-muted-foreground hover:text-foreground cursor-pointer"
-                title="Daily Quests & Streak"
+                className="relative h-7 w-7 sm:w-8 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-background/80 transition-all cursor-pointer"
+                title="Daily Rituals & Objectives"
               >
-                <Target className="w-4 h-4 text-emerald-500" />
+                <Target className="w-3.5 h-3.5 stroke-[2]" />
                 {hasClaimable && (
-                  <span className="absolute top-1.5 right-1.5 flex h-2 w-2">
+                  <span className="absolute top-1 right-1 flex h-1.5 w-1.5">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
                   </span>
                 )}
-              </Button>
+              </button>
 
-              {/* Achievements Gallery Button */}
-              <Button
-                variant="ghost"
-                size="icon"
+              {/* Achievements / Badges Gallery */}
+              <button
+                type="button"
                 onClick={() => setAchievementsOpen(true)}
-                className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl text-muted-foreground hover:text-foreground cursor-pointer"
-                title="Achievements & Badges Gallery"
+                className="h-7 w-7 sm:w-8 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-background/80 transition-all cursor-pointer"
+                title="Badges & Milestones Catalog"
               >
-                <Trophy className="w-4 h-4 text-amber-500" />
-              </Button>
+                <Trophy className="w-3.5 h-3.5 stroke-[2]" />
+              </button>
 
-              {/* Personal Analytics & Heatmap Button */}
-              <Button
-                variant="ghost"
-                size="icon"
+              {/* Personal Telemetry / Heatmap */}
+              <button
+                type="button"
                 onClick={() => setAnalyticsOpen(true)}
-                className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl text-muted-foreground hover:text-foreground cursor-pointer"
-                title="Personal Analytics Hub"
+                className="h-7 w-7 sm:w-8 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-background/80 transition-all cursor-pointer"
+                title="Personal Telemetry & Heatmap"
               >
-                <BarChart3 className="w-4 h-4 text-cyan-500" />
-              </Button>
-            </>
+                <BarChart3 className="w-3.5 h-3.5 stroke-[2]" />
+              </button>
+            </div>
           )}
 
           {/* Filter Pills */}
-          <div className="hidden sm:flex items-center p-0.5 rounded-xl bg-secondary/60 border border-border/50 text-xs">
+          <div className="hidden sm:flex items-center p-0.5 rounded-lg bg-secondary/40 border border-border/60 text-xs">
             <button
               type="button"
               onClick={() => setFilterBy("all")}
-              className={`px-2 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+              className={`px-2 py-0.5 rounded-md text-xs font-medium transition-all cursor-pointer ${
                 filterBy === "all"
-                  ? "bg-background text-foreground shadow-xs font-semibold"
+                  ? "bg-background text-foreground shadow-2xs font-semibold"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -191,13 +191,13 @@ export function Header() {
             <button
               type="button"
               onClick={() => setFilterBy("pinned")}
-              className={`px-2 py-1 rounded-lg text-xs font-medium transition-all flex items-center gap-1 cursor-pointer ${
+              className={`px-2 py-0.5 rounded-md text-xs font-medium transition-all flex items-center gap-1 cursor-pointer ${
                 filterBy === "pinned"
-                  ? "bg-background text-foreground shadow-xs font-semibold"
+                  ? "bg-background text-foreground shadow-2xs font-semibold"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              <Bookmark className="w-3 h-3 text-indigo-500" />
+              <Bookmark className="w-3 h-3 text-indigo-500 fill-indigo-500/20" />
               <span className="hidden md:inline">Pinned</span>
             </button>
           </div>
@@ -208,13 +208,13 @@ export function Header() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl text-muted-foreground hover:text-foreground"
+                className="w-8 h-8 rounded-lg text-muted-foreground hover:text-foreground border border-border/60 bg-secondary/20 hover:bg-secondary/60"
                 title="Sort counters"
               >
-                <ArrowUpDown className="w-4 h-4" />
+                <ArrowUpDown className="w-3.5 h-3.5" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-44">
+            <DropdownMenuContent align="end" className="w-44 font-mono text-xs">
               <DropdownMenuRadioGroup
                 value={sortBy}
                 onValueChange={(v) => setSortBy(v as SortOption)}
@@ -228,41 +228,40 @@ export function Header() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Shortcuts Guide Button */}
+          {/* Keyboard Shortcuts Button */}
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setShortcutsOpen(true)}
-            className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl text-muted-foreground hover:text-foreground hidden md:inline-flex"
+            className="w-8 h-8 rounded-lg text-muted-foreground hover:text-foreground border border-border/60 bg-secondary/20 hover:bg-secondary/60 hidden md:inline-flex"
             title="Keyboard shortcuts (?)"
           >
-            <HelpCircle className="w-4 h-4" />
+            <HelpCircle className="w-3.5 h-3.5" />
           </Button>
 
-          {/* Preferences & Storage Settings */}
+          {/* Settings & Storage */}
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setSettingsOpen(true)}
-            className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl text-muted-foreground hover:text-foreground"
-            title="Settings & Data Backup"
+            className="w-8 h-8 rounded-lg text-muted-foreground hover:text-foreground border border-border/60 bg-secondary/20 hover:bg-secondary/60"
+            title="Settings & Preferences"
           >
-            <SlidersHorizontal className="w-4 h-4" />
+            <SlidersHorizontal className="w-3.5 h-3.5" />
           </Button>
 
-          {/* Light / Dark Theme Switcher */}
+          {/* Theme Toggle */}
           <ThemeToggle />
 
-          {/* + New Counter CTA Button */}
+          {/* New Counter Button */}
           <Button
-            variant="glow"
             size="sm"
             onClick={openCreate}
-            className="h-8 sm:h-9 px-2.5 sm:px-3.5 rounded-xl gap-1.5 font-semibold text-xs ml-0.5 sm:ml-1 shadow-md cursor-pointer"
+            className="h-8 px-3 rounded-lg gap-1.5 font-semibold text-xs ml-0.5 shadow-sm bg-foreground text-background hover:bg-foreground/90 cursor-pointer font-mono"
           >
-            <Plus className="w-4 h-4 stroke-[2.5]" />
-            <span className="hidden sm:inline">New Counter</span>
-            <kbd className="hidden lg:inline text-[9px] font-mono px-1 py-0.2 rounded bg-white/20">
+            <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+            <span className="hidden sm:inline">New</span>
+            <kbd className="hidden lg:inline text-[9px] font-mono px-1 rounded bg-background/20 text-background">
               N
             </kbd>
           </Button>
