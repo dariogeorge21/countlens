@@ -21,6 +21,9 @@ export const metadata: Metadata = {
   description:
     "A tactile, physical-feeling counter management web app with gestures, 3D depth, and offline persistence.",
   keywords: ["counter", "tally", "gestures", "3D", "tactile UI", "PWA"],
+  icons: {
+    icon: "/countlens-logo.svg",
+  },
 };
 
 export const viewport: Viewport = {

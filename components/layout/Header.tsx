@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import {
   Search,
   Plus,
@@ -62,9 +63,13 @@ export function Header() {
         {/* Brand Identity & Telemetry Cluster */}
         <div className="flex items-center gap-2.5 sm:gap-3 flex-shrink-0">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-foreground text-background flex items-center justify-center font-mono font-black text-xs tracking-tighter shadow-xs">
-              CL
-            </div>
+            <Image
+              src="/countlens-logo.svg"
+              alt="COUNTLENS logo"
+              width={32}
+              height={32}
+              className="w-8 h-8 rounded-lg shadow-xs flex-shrink-0"
+            />
             <div className="hidden sm:flex flex-col">
               <span className="font-bold tracking-tight text-sm leading-none text-foreground font-mono">
                 COUNTLENS

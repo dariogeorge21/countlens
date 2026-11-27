@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
+import Image from "next/image";
 import { Header } from "@/components/layout/Header";
 import { CounterGrid } from "@/components/layout/CounterGrid";
 import { CounterForm } from "@/components/counter/CounterForm";
@@ -71,8 +72,16 @@ export default function Home() {
 
       {/* Footer Branding */}
       <footer className="relative z-10 py-6 border-t border-border/40 text-center text-xs text-muted-foreground select-none">
-        <p className="font-mono">
-          COUNTLENS &bull; Built with tactile motion, 3D depth &amp; local persistence
+        <p className="font-mono inline-flex items-center justify-center gap-2">
+          <Image
+            src="/countlens-logo.svg"
+            alt=""
+            width={16}
+            height={16}
+            className="w-4 h-4 rounded-sm"
+            aria-hidden="true"
+          />
+          <span>COUNTLENS &bull; Built with tactile motion, 3D depth &amp; local persistence</span>
         </p>
       </footer>
 
